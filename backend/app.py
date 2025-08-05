@@ -10,20 +10,20 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-# CORS for extension
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict in production
+    allow_origins=["*"],  # TODO: Restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory cache for website content
+# In-memory cache
 cache = {}
 cache_lock = asyncio.Lock()
 
-# Rate-limit Gemini calls
+# Simple rate-limiter
 gemini_queue = asyncio.Queue(maxsize=3)
 
 # --------- FETCH WEBSITE CONTENT ---------
@@ -36,8 +36,8 @@ async def fetch_website_text(url: str) -> str:
             return cache[url]
 
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.get(url)
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(url, headers={"User-Agent": "Mozilla/5.0"})
             response.raise_for_status()
 
             soup = BeautifulSoup(response.text, "html.parser")
@@ -45,7 +45,7 @@ async def fetch_website_text(url: str) -> str:
                 tag.decompose()
 
             text = soup.get_text(separator=" ", strip=True)
-            content = text[:12000]  # Token limit for Gemini
+            content = text[:12000]
 
             async with cache_lock:
                 cache[url] = content
@@ -61,7 +61,7 @@ async def chat(request: Request):
     user_prompt = data.get("prompt", "").strip()
     context_raw = data.get("context", "").strip()
 
-    # Check basic format
+    # Validate format
     if not context_raw.startswith("Website: ") or "Language: " not in context_raw:
         return {
             "response": "Invalid context format. Expected:\nWebsite: <url>\\nLanguage: <optional language>"
@@ -74,17 +74,17 @@ async def chat(request: Request):
             "response": "Invalid context format. Expected:\nWebsite: <url>\\nLanguage: <optional language>"
         }
 
-    # ✅ Fetch website content
+    print("🔗 URL received:", url)
+
     website_text = await fetch_website_text(url)
+    print("📄 Website content snippet:", website_text[:300])
+
     if website_text.startswith("[ERROR]"):
         return {"response": website_text}
 
     final_prompt = f"{user_prompt}\n\n---\nWebsite Content:\n{website_text}"
-
-    # ✅ Clean formatting instructions
     final_prompt += "\n\nDONT USE SPECIAL-CASE CHARACTERS LIKE ASTERISKS AND UNDERSCORES FOR TEXT-STYLING! USE PLAIN CLEAN TEXT ONLY! USE NUMBERS (1.,2.,3.,...) AND ROMAN NUMBERS (IF NEEDED) FOR KEYPOINTS AND NUMBERING!\n\n"
 
-    # ✅ Rate-limited Gemini call
     await gemini_queue.put(1)
     try:
         response = await call_gemini(final_prompt, context_raw)
