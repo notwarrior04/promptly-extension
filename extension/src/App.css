@@ -1,0 +1,167 @@
+body {
+  background-color: #000;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+  color: #fff;
+}
+
+.chat-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  color: #e0e0e0;
+}
+
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #ffffff;
+}
+
+.chat-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #d0d0d0;
+  margin-bottom: 0.3rem;
+}
+
+.chat-textarea {
+  font-size: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  border: 1px solid #444;
+  background-color: #121212;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 100px;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+.chat-textarea::placeholder {
+  color: #aaa;
+  opacity: 0.9;
+}
+
+.chat-textarea:focus {
+  outline: none;
+  border: 1px solid #888;
+  background-color: #1a1a1a;
+}
+
+.mic-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background-color: #1e90ff;
+  color: white;
+  padding: 0.75rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.mic-button:hover {
+  background-color: #0073e6;
+}
+
+.mic-button.listening {
+  background-color: #ff4d4f;
+}
+
+.submit-button {
+  background-color: #ffffff;
+  color: #000;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.9rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #e6e6e6;
+}
+
+.response-container {
+  margin-top: 2rem;
+  background-color: #1a1a1a;
+  padding: 1.2rem;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  border: 1px solid #333;
+}
+
+.response-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #ffffff;
+}
+
+.chat-response {
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+/* 🔊 Speak Response Button */
+.speak-button {
+  margin-top: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.speak-button:hover {
+  background-color: #0073e6;
+}
+
+.response-title {
+  margin-top: 0;
+}
+
+/* 📱 Mobile responsiveness */
+@media (max-width: 768px) {
+  .chat-container {
+    padding: 1.2rem;
+  }
+
+  .app-title {
+    font-size: 2rem;
+  }
+
+  .chat-textarea,
+  .submit-button,
+  .mic-button,
+  .speak-button {
+    font-size: 1rem;
+  }
+}
