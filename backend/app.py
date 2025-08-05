@@ -7,14 +7,13 @@ from langdetect import detect
 import validators
 import asyncio
 from pydantic import BaseModel
-import re  # ✅ Needed for base64 detection
 
 app = FastAPI()
 
 # CORS for extension
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict to extension ID in production
+    allow_origins=["*"],  # Restrict in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -75,21 +74,15 @@ async def chat(request: Request):
             "response": "Invalid context format. Expected:\nWebsite: <url>\\nLanguage: <optional language>"
         }
 
-    # ✅ Check if base64 image is present in context_raw
-    is_base64_present = "data:image/" in context_raw and ";base64," in context_raw
+    # ✅ Fetch website content
+    website_text = await fetch_website_text(url)
+    if website_text.startswith("[ERROR]"):
+        return {"response": website_text}
 
-    if is_base64_present:
-        # ✅ Use context directly — do NOT fetch URL
-        final_prompt = f"{user_prompt}\n\n---\nContext:\n{context_raw}"
-    else:
-        # ✅ Fetch website content normally
-        website_text = await fetch_website_text(url)
-        if website_text.startswith("[ERROR]"):
-            return {"response": website_text}
-        final_prompt = f"{user_prompt}\n\n---\nWebsite Content:\n{website_text}"
+    final_prompt = f"{user_prompt}\n\n---\nWebsite Content:\n{website_text}"
 
     # ✅ Clean formatting instructions
-    final_prompt += "\n\nDONT USE SEPCIAL-CASE CHARACTERS LIKE ASTERISKS AND UNDERSCORES FOR TEXT-STYLING! USE PLAIN CLEAN TEXT ONLY! USE NUMBERS (1.,2.,3.,...) AND ROMAN NUMBERS (IF NEEDED) FOR KEYPOINTS AND NUMBERING!\n\n"
+    final_prompt += "\n\nDONT USE SPECIAL-CASE CHARACTERS LIKE ASTERISKS AND UNDERSCORES FOR TEXT-STYLING! USE PLAIN CLEAN TEXT ONLY! USE NUMBERS (1.,2.,3.,...) AND ROMAN NUMBERS (IF NEEDED) FOR KEYPOINTS AND NUMBERING!\n\n"
 
     # ✅ Rate-limited Gemini call
     await gemini_queue.put(1)

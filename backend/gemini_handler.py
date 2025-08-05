@@ -1,17 +1,7 @@
-import re
 import httpx
 from gemini_config import GEMINI_API_KEY
 
-
-# Detect base64 image in context (optional visual support)
-def extract_base64_snippet(context: str) -> str:
-    match = re.search(r"(data:image/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=]+)", context)
-    if match:
-        return f"[An image is attached as base64: {match.group(1)[:200]}... (truncated)]"
-    return ""
-
-
-# Async function for general prompts
+# --------- CALL GEMINI API ---------
 async def call_gemini(prompt, context=""):
     url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent"
 
@@ -20,15 +10,12 @@ async def call_gemini(prompt, context=""):
         "X-goog-api-key": GEMINI_API_KEY
     }
 
-    # If image exists, include it as part of the descriptive context
-    base64_note = extract_base64_snippet(context)
-
     data = {
         "contents": [
             {
                 "parts": [
                     {
-                        "text": f"{prompt}\n\nContext:\n{context}\n\n{base64_note}"
+                        "text": f"{prompt}\n\nContext:\n{context}"
                     }
                 ]
             }
@@ -47,8 +34,7 @@ async def call_gemini(prompt, context=""):
         except KeyError:
             return f"Error: {result.get('error', {}).get('message', 'Unknown issue')}"
 
-
-# Sync function for classification
+# --------- CLASSIFY WEBPAGE CONTENT ---------
 def classify_webpage_content(content: str) -> str:
     import requests
 
