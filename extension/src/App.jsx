@@ -92,7 +92,7 @@ function App() {
 
       const context = `Website: ${url}\nLanguage: ${lang}\n\nPage Text:\n${text.slice(0, 2000)}\n\nImage Base64:\n${imageBase64 ? imageBase64.substring(0, 300) + '...' : 'none'}`;
 
-      const res = await fetch('http://localhost:8000/chat', {
+      const res = await fetch('https://promptly-extension.onrender.com/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, context }),
