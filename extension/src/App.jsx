@@ -68,11 +68,10 @@ function App() {
   const getPageContext = () => {
     return new Promise((resolve) => {
       chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        if (!tab?.id) return resolve({ text: '', imageBase64: null, url: '' });
+        if (!tab?.id) return resolve({ text: '', url: '' });
         chrome.tabs.sendMessage(tab.id, { type: 'GET_PAGE_CONTEXT' }, (res) => {
           resolve({
             text: res?.text || '',
-            imageBase64: res?.imageBase64 || null,
             url: tab.url || '',
           });
         });
@@ -87,10 +86,14 @@ function App() {
     setResponse('Loading...');
 
     try {
-      const { text, imageBase64, url } = await getPageContext();
+      const { text, url } = await getPageContext();
       const lang = 'Auto';
 
-      const context = `Website: ${url}\nLanguage: ${lang}\n\nPage Text:\n${text.slice(0, 2000)}\n\nImage Base64:\n${imageBase64 ? imageBase64.substring(0, 300) + '...' : 'none'}`;
+      const context = `Website: ${url}
+Language: ${lang}
+
+Page Text:
+${text.slice(0, 2000)}`;
 
       const res = await fetch('https://promptly-extension.onrender.com/chat', {
         method: 'POST',
